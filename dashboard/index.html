@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Token Radar — the pre-token protocol board</title>
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+<header class="head">
+  <div>
+    <h1>Token Radar</h1>
+    <p class="sub">The pre-token protocol board: every protocol in the snapshot that records no token, ranked by its implied value.</p>
+  </div>
+  <div class="head-stats" id="head-stats"></div>
+</header>
+
+<section class="panel method" id="method">
+  <h2>How the value is worked out</h2>
+  <p>The model is fitted from the snapshot itself. A size curve is fitted on the trading protocols that report a market cap: log10(market cap) = intercept + slope &times; log10(TVL). Each category then gets its own adjustment, the median of log10(actual / curve) for its trading members, shrunk toward zero when a category has few members. A protocol's implied value is the curve value, times its category adjustment, times a growth multiplier (half its 7-day TVL change, clamped to &plusmn;30%) and a maturity multiplier (0.75 to 1.00 by age, up to three years). Growth and age are small priors on purpose: on the trading set neither predicts the residual. No protocol name is ever special-cased. Bridges and canonical bridges are not ranked: their TVL is other protocols' assets passing through, and they issue no token of their own.</p>
+  <p class="fit" id="fit-line"></p>
+  <p class="fit" id="check-line"></p>
+</section>
+
+<section class="panel controls" id="controls">
+  <div class="tabs" role="tablist">
+    <button id="tab-radar" class="tab on" type="button">Pre-token radar</button>
+    <button id="tab-live" class="tab" type="button">Live tokens</button>
+  </div>
+  <label class="ctl">Search <input id="q" type="search" placeholder="protocol name or slug" autocomplete="off"></label>
+  <label class="ctl">Category <select id="category"><option value="">All categories</option></select></label>
+  <label class="ctl">Sort <select id="sort">
+    <option value="rank">Rank (implied value)</option>
+    <option value="tvl">TVL, high to low</option>
+    <option value="growth">7-day growth, high to low</option>
+    <option value="age">Age, oldest first</option>
+  </select></label>
+  <label class="ctl check"><input id="watchlist-only" type="checkbox"> Watchlist only</label>
+  <button id="clear" class="btn" type="button">Clear filters</button>
+</section>
+
+<section class="panel detail" id="detail" hidden>
+  <div class="detail-head">
+    <div>
+      <h2 id="detail-name"></h2>
+      <p class="muted" id="detail-meta"></p>
+    </div>
+    <div class="detail-value"><span id="detail-implied"></span><small>implied value</small></div>
+  </div>
+  <div class="detail-grid">
+    <div>
+      <h3>Model breakdown</h3>
+      <table class="breakdown" id="detail-model"></table>
+      <p class="note" id="detail-note"></p>
+    </div>
+    <div>
+      <h3>Farm plan</h3>
+      <ol class="steps" id="detail-steps"></ol>
+    </div>
+  </div>
+  <button id="detail-close" class="btn" type="button">Close detail</button>
+</section>
+
+<main class="panel">
+  <div class="board-head"><h2 id="board-title">Ranked board</h2><p class="muted" id="board-count"></p></div>
+  <div class="table-wrap">
+    <table id="board">
+      <thead><tr>
+        <th data-sort="rank">#</th>
+        <th data-sort="name">Protocol</th>
+        <th data-sort="category">Category</th>
+        <th data-sort="tvl">TVL</th>
+        <th data-sort="growth">7d</th>
+        <th data-sort="age">Age</th>
+        <th data-sort="implied">Implied value</th>
+        <th data-sort="multiple">&times;TVL</th>
+      </tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </div>
+  <button id="more" class="btn wide" type="button">Show more</button>
+</main>
+
+<footer class="foot">
+  <p id="foot-line"></p>
+  <p class="muted">Implied values are this radar's own estimate from the snapshot's figures, not a price and not a promise. A protocol with no token may never launch one. Farm plans are a starting point: check the protocol's own page before sending money anywhere.</p>
+</footer>
+<script src="../data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
